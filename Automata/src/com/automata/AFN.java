@@ -1,0 +1,375 @@
+package com.automata;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Stack;
+import java.util.ListIterator;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class AFN {
+    public static HashSet<AFN> conjunto_afn = new HashSet<AFN>(); //Almacena todos los AFNs creados
+    Estado estado_inicial; //Estado incial del AFN
+    HashSet<Estado> estados = new HashSet<Estado>(); //Conjunto de estados del AFN
+    HashSet<Estado> estados_aceptacion = new HashSet<Estado>(); //Conjunto de estados de aceptación del AFN
+    HashSet<Character> alfabeto = new HashSet<Character>();
+    boolean afn_agregado; //Bandera para saber si el AFN ha sido agregado
+    public int id; //Id de cada AFN
+    public char epsilon = '\u0000'; //Caracter que representa a epsilon
+    
+    //Constructores
+    public AFN(){ //Crea un AFN vacío
+        id = 0;
+        estado_inicial = null;
+        estados.clear();
+        estados_aceptacion.clear();
+        alfabeto.clear();
+        afn_agregado = false;
+    }
+    
+    //Funciones
+    public AFN crearAFNBasico(char simbolo){ //Crea un AFN básico con solo un símbolo
+        Transicion transicion;
+        Estado estado1;
+        Estado estado2;
+        estado1 = new Estado();
+        estado2 = new Estado();
+        transicion = new Transicion(simbolo, estado2);
+        estado1.transiciones.add(transicion);
+        estado2.de_aceptacion = true;
+        alfabeto.add(simbolo);
+        estado_inicial = estado1;
+        estados.add(estado1);
+        estados.add(estado2);
+        estados_aceptacion.add(estado2);
+        id = conjunto_afn.size();
+        
+        if(conjunto_afn.add(this)){
+            System.out.println("Automata básico agregado");
+        }
+        afn_agregado = true;
+        imprimirAFN(this);
+        return this;
+    }
+    
+    public AFN crearAFNBasico(char simbolo_inferior, char simbolo_superior){ //Crea un AFN básico con un rango de símbolos
+        char validacion; //simbolo_inferior <= simbolo_superior
+        Transicion transicion;
+        Estado estado1;
+        Estado estado2;
+        estado1 = new Estado();
+        estado2 = new Estado();
+        transicion = new Transicion(simbolo_inferior, simbolo_superior, estado2);
+        estado1.transiciones.add(transicion);
+        estado2.de_aceptacion = true;
+        
+        for(validacion = simbolo_inferior; validacion <= simbolo_superior; validacion++){
+            alfabeto.add(validacion);
+        }
+        
+        estado_inicial = estado1;
+        estados.add(estado1);
+        estados.add(estado2);
+        estados_aceptacion.add(estado2);
+        id = conjunto_afn.size();
+        if(conjunto_afn.add(this)){
+            System.out.println("Automata básico agregado ");
+        }
+        afn_agregado = true;
+        imprimirAFN(this);
+        return this;
+    }
+    
+    public AFN unirAFN(AFN AFN2){
+        Estado estado1 = new Estado();
+        Estado estado2 = new Estado();
+        //El estado1 tendrá 2 transiciones epsilon, una al estado inicial de this y la otra al estado inicla del AFN2
+        Transicion transition1 = new Transicion(epsilon, this.estado_inicial);
+        Transicion transition2 = new Transicion(epsilon, AFN2.estado_inicial);
+        estado1.transiciones.add(transition1);
+        estado1.transiciones.add(transition2);
+        this.estado_inicial = estado1;
+        //Ahora cada estado de aceptación de this y de AFN2 tendrá una nueva transición epsilon a estado2
+        //Aquellos que son estados de aceptación de this, ya no lo serán
+        //Aquellos que son estados de aceptación de AFN2, ya no lo serán
+        for(Estado estado: this.estados_aceptacion){
+            estado.transiciones.add(new Transicion(epsilon, estado2));
+            estado.de_aceptacion = false;
+        }
+        
+        for(Estado estado: AFN2.estados_aceptacion){
+            estado.transiciones.add(new Transicion(epsilon, estado2));
+            estado.de_aceptacion = false;
+        }
+        
+        estado2.de_aceptacion = true;
+        this.estados_aceptacion.clear();
+        this.estados_aceptacion.add(estado2);
+        
+        this.estados.addAll(AFN2.estados);
+        
+        this.estados.add(estado1);
+        this.estados.add(estado2);
+        
+        this.alfabeto.addAll(AFN2.alfabeto); //Juntamos el alfabeto de los automatas
+        System.out.println("AFNs unidos correctamente");
+        imprimirAFN(this);
+        return this;
+    }
+    
+    public AFN concatenarAFN(AFN AFN2){
+        /* En esta operación necesitamos modificar los estados mientras iteramos, para esto vamos a usar List de ArrayList
+        ya que si seguimos usando HashSet, no se podrá modificar durante la iteración */
+        List<Estado> lista_estados = new ArrayList<Estado>(this.estados);
+        ListIterator<Estado> iterador_estados = lista_estados.listIterator(); //Podríamos usar la iteración normal o usando un objeto Iterator
+        while(iterador_estados.hasNext()){
+            Estado estado = iterador_estados.next();
+            List<Transicion> lista_transiciones = new ArrayList<Transicion>(estado.transiciones);
+            
+            ListIterator<Transicion> iterador_transiciones = lista_transiciones.listIterator();
+            while(iterador_transiciones.hasNext()){
+                Transicion transicion = iterador_transiciones.next();
+                if(transicion.estado_destino.de_aceptacion == true){
+                    if(transicion.simbolo_inferior != transicion.simbolo_superior){
+                        estado.transiciones.add(new Transicion(transicion.simbolo_inferior, transicion.simbolo_superior, AFN2.estado_inicial));
+                    }else{
+                        estado.transiciones.add(new Transicion(transicion.simbolo_inferior, AFN2.estado_inicial));
+                    }
+                    estado.transiciones.remove(transicion);
+                    this.estados.remove(transicion.estado_destino);
+                }
+            }
+        }
+        
+        this.estados = new HashSet<Estado>(lista_estados);
+        AFN2.estado_inicial.de_aceptacion = false;
+        //this.states.remove(absorbed_state);
+        
+        this.estados_aceptacion.clear();
+        this.estados_aceptacion.addAll(AFN2.estados_aceptacion);
+        this.estados.addAll(AFN2.estados);
+        this.alfabeto.addAll(AFN2.alfabeto);
+        System.out.println("AFNs concatenados");
+        imprimirAFN(this);
+        return this;
+    }
+    
+    public AFN cerraduraKleen(){
+        Estado estado1 = new Estado();
+        Estado estado2 = new Estado();
+        
+        estado1.transiciones.add(new Transicion(epsilon, this.estado_inicial));
+        estado1.transiciones.add(new Transicion(epsilon, estado2));
+        
+        for(Estado state: this.estados){
+            if(state.de_aceptacion){
+                state.transiciones.add(new Transicion(epsilon, this.estado_inicial));
+                state.transiciones.add(new Transicion(epsilon, estado2));
+                state.de_aceptacion = false;
+            }
+        }
+        
+        estado2.de_aceptacion = true;
+        
+        this.estado_inicial = estado1;
+        
+        this.estados_aceptacion.clear();
+        this.estados_aceptacion.add(estado2);
+        
+        this.estados.add(estado1);
+        this.estados.add(estado2);
+        
+        System.out.println("Cerradura de Kleen aplicada");
+        imprimirAFN(this);
+        return this;
+    }
+    
+    public AFN cerraduraTransitiva(){
+        Estado estado1 = new Estado();
+        Estado estado2 = new Estado();
+        
+        estado1.transiciones.add(new Transicion(epsilon, this.estado_inicial));
+        
+        for(Estado state: this.estados){
+            if(state.de_aceptacion){
+                state.transiciones.add(new Transicion(epsilon, this.estado_inicial));
+                state.transiciones.add(new Transicion(epsilon, estado2));
+                state.de_aceptacion = false;
+            }
+        }
+        
+        estado2.de_aceptacion = true;
+        
+        this.estado_inicial = estado1;
+        
+        this.estados_aceptacion.clear();
+        this.estados_aceptacion.add(estado2);
+        
+        this.estados.add(estado1);
+        this.estados.add(estado2);
+        
+        System.out.println("Cerradura transitiva aplicada");
+        imprimirAFN(this);
+        return this;
+    }
+    
+    public AFN opcional(){
+        Estado estado1 = new Estado();
+        Estado estado2 = new Estado();
+        
+        estado1.transiciones.add(new Transicion(epsilon, this.estado_inicial));
+        estado1.transiciones.add(new Transicion(epsilon, estado2));
+        
+        for(Estado state: this.estados){
+            if(state.de_aceptacion){
+                state.transiciones.add(new Transicion(epsilon, estado2));
+                state.de_aceptacion = false;
+            }
+        }
+        
+        estado2.de_aceptacion = true;
+        
+        this.estado_inicial = estado1;
+        
+        this.estados_aceptacion.clear();
+        this.estados_aceptacion.add(estado2);
+        
+        this.estados.add(estado1);
+        this.estados.add(estado2);
+        
+        System.out.println("Opcional aplicada");
+        imprimirAFN(this);
+        return this;
+    }
+    
+    public HashSet<Estado> cerraduraEpsilon(HashSet<Estado> estados){ //Cerradura epsilon para un conjunto de estados
+        HashSet<Estado> estados_alcanzables = new HashSet<Estado>();
+        Stack<Estado> estados_por_analizar = new Stack<Estado>();
+        
+        for(Estado estado: estados){
+            estados_por_analizar.push(estado);
+        }
+        
+        while(!estados_por_analizar.isEmpty()){
+            Estado estado = estados_por_analizar.pop();
+            
+            if(estados_alcanzables.contains(estado))
+                continue;
+            
+            estados_alcanzables.add(estado);
+            for(Transicion transicion: estado.transiciones){
+                if(transicion.simbolo_inferior == epsilon)
+                    estados_por_analizar.push(transicion.estado_destino);
+            }
+        }
+        
+        return estados_alcanzables;
+    }
+    
+    public HashSet<Estado> mover(HashSet<Estado> estados, char simbolo){
+        HashSet<Estado> estados_alcanzables = new HashSet<Estado>();
+        estados_alcanzables.clear();
+        
+        for(Estado estado: estados){
+            for(Transicion transicion: estado.transiciones){
+                if(simbolo >= transicion.simbolo_inferior && simbolo <= transicion.simbolo_superior)
+                    estados_alcanzables.add(transicion.estado_destino);
+            }
+        }
+        
+        return estados_alcanzables;
+    }
+    
+    public HashSet<Estado> ir_a(HashSet<Estado> estados, char simbolo){
+        return cerraduraEpsilon(mover(estados, simbolo));
+    }
+    
+    /*public void unionEspecialAFNs(AFN afn, int token){
+        Estado estado = null;
+        if(!this.afn_agregado){
+            this.estados.clear();
+            this.alfabeto.clear();
+            estado = new Estado();
+            estado.transiciones.add()
+        }
+    }*/
+    
+    /*public AFD convertirAFNaAFD(){
+        int cardinalidad_alfabeto, numero_estados_afn;
+        int i, j, r;
+        char[] arreglo_alfabeto;
+        ConjuntoIJ Ij, Ik;
+        boolean existe;
+        
+        HashSet<Estado> conjunto_auxiliar = new HashSet<Estado>();
+        HashSet<ConjuntoIJ> estados_afd = new HashSet<ConjuntoIJ>();
+        Queue<ConjuntoIJ> estados_sin_analizar = new LinkedList<ConjuntoIJ>();
+        
+        estados_afd.clear();
+        estados_sin_analizar.clear();
+        
+        cardinalidad_alfabeto = this.alfabeto.size();
+        arreglo_alfabeto = new char[cardinalidad_alfabeto];
+        i = 0;
+        
+        for(char simbolo: this.alfabeto){
+            arreglo_alfabeto[i++] = simbolo;
+        }
+        
+        j = 0; //Contador para los estados del AFD
+        Ij = new ConjuntoIJ(cardinalidad_alfabeto);
+        
+        estados_afd.add(Ij);
+        estados_sin_analizar.add(Ij);
+        j++;
+        
+        while(estados_sin_analizar.size() != 0){ //Mientras se tengan estados Ij sin analizar
+            Ik = new ConjuntoIJ(cardinalidad_alfabeto);
+            
+            if(Ik.conjunto_ij.size() == 0) //Si el conjunto fue vacío no hubo transiciones de Ij con el simbolo
+                continue;
+            
+            //Revisemos si el conjunto de estados ya existe, en caso contrario será un nuevo conjunto
+            existe = false;
+            for(ConjuntoIJ I: estados_afd){
+                if(estados_afd.contains(I)){
+                    existe = true;
+                    r = 
+                }
+            }
+        }
+        
+        return null;
+    }*/
+    
+    public void imprimirAFN(AFN nfa){
+        System.out.println("NFA:");
+        System.out.println("Id: " + nfa.id);
+        System.out.println("Estados:");
+        for(Estado state: nfa.estados){
+            System.out.println("\tId: " + state.id);
+            System.out.println("\tEs de aceptación?: " +state.de_aceptacion);
+            System.out.println("\tTransiciones:");
+            for(Transicion transition: state.transiciones){
+                System.out.println("\t\tSímbolo inferior: " + transition.simbolo_inferior);
+                System.out.println("\t\tSímbolo superior: " + transition.simbolo_superior);
+                System.out.println("\t\tEstado destino");
+                System.out.println("\t\t\tId: " + transition.estado_destino.id);
+            }
+        }
+        System.out.println("Estado inicial:");
+        System.out.println("\tId:" + nfa.estado_inicial.id);
+        System.out.println("Estados de aceptación:");
+        for(Estado state: nfa.estados_aceptacion){
+            System.out.println("\tId: " + state.id);
+        }
+        System.out.printf("Alfabeto: {");
+        for(Character symbol: nfa.alfabeto){
+            System.out.printf(symbol + ",");
+        }
+        System.out.printf("}\n");
+        System.out.println("Ya está agregado al conjunto de NFA?: " + nfa.afn_agregado);
+    }
+    
+}

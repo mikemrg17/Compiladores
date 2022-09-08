@@ -1,7 +1,7 @@
 package com.userInterface;
 
 import java.awt.Color;
-import com.automata.NFA;
+import com.automata.AFN;
 import java.util.HashSet;
 import javax.swing.JOptionPane;
 import javax.swing.JFrame;
@@ -562,7 +562,7 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_testLexicalAnalyzerLabelMouseExited
 
     private void basicLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_basicLabelMouseClicked
-        NFA nfa = new NFA();
+        AFN nfa = new AFN();
         String[] options = { "Símbolo", "Rango" };
         int option = JOptionPane.showOptionDialog(null, "Elige una: ", "Opciones", JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
@@ -570,7 +570,7 @@ public class MainPage extends javax.swing.JFrame {
         if(option == 0){
             String input = JOptionPane.showInputDialog("Inserta el símbolo del AFN básico");
             char symbol = input.charAt(0);
-            nfa.createBasicNFA(symbol);
+            nfa.crearAFNBasico(symbol);
             JOptionPane.showMessageDialog(this, "AFN Básico creado con símbolos: " + symbol + "\n"
                     + "Con id: " + nfa.id 
             );
@@ -581,7 +581,7 @@ public class MainPage extends javax.swing.JFrame {
             char lowerSymbol = input.charAt(0);
             input = JOptionPane.showInputDialog("Inserta el símbolo superior del AFN básico");
             char upperSymbol = input.charAt(0);
-            nfa.createBasicNFA(lowerSymbol, upperSymbol);
+            nfa.crearAFNBasico(lowerSymbol, upperSymbol);
             JOptionPane.showMessageDialog(this, "AFN Básico creado con símbolos: [" + lowerSymbol + "," + upperSymbol + "]" + "\n"
                     + "Con id: " + nfa.id 
             );
@@ -599,17 +599,17 @@ public class MainPage extends javax.swing.JFrame {
         System.out.println("Id seleccionado: " + selectedId);
         String mergingId = (String) JOptionPane.showInputDialog(null, "Une un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
-        NFA nfaToMerge = new NFA();
-        NFA globalNFA = new NFA();
-        for(NFA nfa: globalNFA.nfaSet ){
+        AFN nfaToMerge = new AFN();
+        AFN globalNFA = new AFN();
+        for(AFN nfa: globalNFA.conjunto_afn ){
             if(nfa.id == Integer.parseInt(mergingId))
                 nfaToMerge = nfa;
                     
         }
         
-        for(NFA baseNFA: globalNFA.nfaSet ){
+        for(AFN baseNFA: globalNFA.conjunto_afn ){
             if(baseNFA.id == Integer.parseInt(selectedId))
-                baseNFA = baseNFA.mergeNFA(nfaToMerge);
+                baseNFA = baseNFA.unirAFN(nfaToMerge);
         }
     }//GEN-LAST:event_mergeLabelMouseClicked
 
@@ -621,18 +621,18 @@ public class MainPage extends javax.swing.JFrame {
         System.out.println("Id seleccionado: " + selectedId);
         String concatenatingId = (String) JOptionPane.showInputDialog(null, "Concatena un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
-        NFA nfaToConcatenate = new NFA();
-        NFA globalNFA = new NFA();
+        AFN nfaToConcatenate = new AFN();
+        AFN globalNFA = new AFN();
         
-        for(NFA nfa: globalNFA.nfaSet ){
+        for(AFN nfa: globalNFA.conjunto_afn ){
             if(nfa.id == Integer.parseInt(concatenatingId))
                 nfaToConcatenate = nfa;
                     
         }
         
-        for(NFA baseNFA: globalNFA.nfaSet ){
+        for(AFN baseNFA: globalNFA.conjunto_afn ){
             if(baseNFA.id == Integer.parseInt(selectedId))
-                baseNFA = baseNFA.concatenateNFA(nfaToConcatenate);
+                baseNFA = baseNFA.concatenarAFN(nfaToConcatenate);
         }
     }//GEN-LAST:event_concatenateLabelMouseClicked
 
@@ -642,10 +642,10 @@ public class MainPage extends javax.swing.JFrame {
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Selected ID: " + selectedId);
-        NFA globalNFA = new NFA();
-        for(NFA nfa: globalNFA.nfaSet){
+        AFN globalNFA = new AFN();
+        for(AFN nfa: globalNFA.conjunto_afn){
             if(nfa.id == Integer.parseInt(selectedId))
-                nfa.kleenClosure(nfa);
+                nfa.cerraduraKleen();
         }
     }//GEN-LAST:event_kleenClosureLabelMouseClicked
 
@@ -655,10 +655,10 @@ public class MainPage extends javax.swing.JFrame {
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Selected ID: " + selectedId);
-        NFA globalNFA = new NFA();
-        for(NFA nfa: globalNFA.nfaSet){
+        AFN globalNFA = new AFN();
+        for(AFN nfa: globalNFA.conjunto_afn){
             if(nfa.id == Integer.parseInt(selectedId))
-                nfa.transitiveClosure(nfa);
+                nfa.cerraduraTransitiva();
         }
     }//GEN-LAST:event_transitiveClosureLabelMouseClicked
 
@@ -668,10 +668,10 @@ public class MainPage extends javax.swing.JFrame {
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Selected ID: " + selectedId);
-        NFA globalNFA = new NFA();
-        for(NFA nfa: globalNFA.nfaSet){
+        AFN globalNFA = new AFN();
+        for(AFN nfa: globalNFA.conjunto_afn){
             if(nfa.id == Integer.parseInt(selectedId))
-                nfa.optional(nfa);
+                nfa.opcional();
         }
     }//GEN-LAST:event_optionalLabelMouseClicked
 
