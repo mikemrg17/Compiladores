@@ -343,33 +343,33 @@ public class AFN {
         return null;
     }*/
     
-    public void imprimirAFN(AFN nfa){
-        System.out.println("NFA:");
-        System.out.println("Id: " + nfa.id);
+    public void imprimirAFN(AFN afn){
+        System.out.println("AFN:");
+        System.out.println("Id: " + afn.id);
         System.out.println("Estados:");
-        for(Estado state: nfa.estados){
-            System.out.println("\tId: " + state.id);
-            System.out.println("\tEs de aceptación?: " +state.de_aceptacion);
+        for(Estado estado: afn.estados){
+            System.out.println("\tId: " + estado.id);
+            System.out.println("\tEs de aceptación?: " +estado.de_aceptacion);
             System.out.println("\tTransiciones:");
-            for(Transicion transition: state.transiciones){
-                System.out.println("\t\tSímbolo inferior: " + transition.simbolo_inferior);
-                System.out.println("\t\tSímbolo superior: " + transition.simbolo_superior);
+            for(Transicion transicion: estado.transiciones){
+                System.out.println("\t\tSímbolo inferior: " + transicion.simbolo_inferior);
+                System.out.println("\t\tSímbolo superior: " + transicion.simbolo_superior);
                 System.out.println("\t\tEstado destino");
-                System.out.println("\t\t\tId: " + transition.estado_destino.id);
+                System.out.println("\t\t\tId: " + transicion.estado_destino.id);
             }
         }
         System.out.println("Estado inicial:");
-        System.out.println("\tId:" + nfa.estado_inicial.id);
+        System.out.println("\tId:" + afn.estado_inicial.id);
         System.out.println("Estados de aceptación:");
-        for(Estado state: nfa.estados_aceptacion){
-            System.out.println("\tId: " + state.id);
+        for(Estado estado: afn.estados_aceptacion){
+            System.out.println("\tId: " + estado.id);
         }
         System.out.printf("Alfabeto: {");
-        for(Character symbol: nfa.alfabeto){
-            System.out.printf(symbol + ",");
+        for(Character simbolo: afn.alfabeto){
+            System.out.printf(simbolo + ",");
         }
         System.out.printf("}\n");
-        System.out.println("Ya está agregado al conjunto de NFA?: " + nfa.afn_agregado);
+        System.out.println("Ya está agregado al conjunto de AFN?: " + afn.afn_agregado);
     }
     
 }
