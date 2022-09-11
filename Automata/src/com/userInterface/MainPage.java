@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 public class MainPage extends javax.swing.JFrame {
     
     public HashSet<String> idSet = new HashSet<String>();
+    public HashSet<String> ids_afd = new HashSet<String>();
 
     public MainPage() {
         initComponents();
@@ -684,7 +685,18 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_lexicalAnalyzerLabelMouseClicked
 
     private void converterLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_converterLabelMouseClicked
-        JOptionPane.showMessageDialog(this, "Convertir AFN a AFD");
+        String idArray[] = new String[idSet.size()];
+        idSet.toArray(idArray);
+        String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
+                null, idArray, idArray[0]);
+        System.out.println("Selected ID: " + selectedId);
+        AFN globalNFA = new AFN();
+        
+        for(AFN nfa: globalNFA.conjunto_afn ){
+            if(nfa.id == Integer.parseInt(selectedId))
+                nfa.convertirAFNaAFD();
+        }
+        
     }//GEN-LAST:event_converterLabelMouseClicked
 
     private void stringAnalyzerLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_stringAnalyzerLabelMouseClicked
