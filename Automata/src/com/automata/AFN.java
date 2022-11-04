@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Stack;
 import java.util.ListIterator;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -20,7 +18,7 @@ public class AFN {
     public int id; //Id de cada AFN
     public char epsilon = '\u0000'; //Caracter que representa a epsilon
     
-    //Constructores
+    //CONSTRUCTORES
     public AFN(){ //Crea un AFN vacío
         id = 0;
         estado_inicial = null;
@@ -30,7 +28,7 @@ public class AFN {
         afn_agregado = false;
     }
     
-    //Funciones
+    //FUNCIONES
     public AFN crearAFNBasico(char simbolo){ //Crea un AFN básico con solo un símbolo
         Transicion transicion;
         Estado estado1;
@@ -309,15 +307,6 @@ public class AFN {
         return cerraduraEpsilon(mover(estados, simbolo));
     }
     
-    /*public void unionEspecialAFNs(AFN afn, int token){
-        Estado estado = null;
-        if(!this.afn_agregado){
-            this.estados.clear();
-            this.alfabeto.clear();
-            estado = new Estado();
-            estado.transiciones.add()
-        }
-    }*/
     
     public AFD convertirAFNaAFD(){
         List<ConjuntoS> conjuntos_s = new ArrayList<ConjuntoS>();
@@ -330,7 +319,7 @@ public class AFN {
         afd.conjunto_inicial = s0;
         conjuntos_por_analizar.add(s0);
         
-        //Paso 2. Analizar el conjunto estados = sj, debemos analizar sj, con cada letra del alfabeto
+        //Paso 2. Analizar el conjunto estados de Sj, debemos analizar Sj, con cada letra del alfabeto
         ConjuntoS conjunto = new ConjuntoS();
         while(!conjuntos_por_analizar.isEmpty()){
             conjunto = conjuntos_por_analizar.poll();
@@ -352,6 +341,7 @@ public class AFN {
                 
                 System.out.println("Se agrega nuevo conjunto S");
                 conjuntos_por_analizar.offer(nuevo_conjunto);
+                System.out.println("El conjunto S" + conjunto.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
             }
             
             conjuntos_s.add(conjunto);
@@ -374,51 +364,7 @@ public class AFN {
         //Paso 5. Obtener alfabeto
         afd.alfabeto.addAll(this.alfabeto); //El alfabeto del AFD es igual al del AFN
         imprimirAFD(afd);
-        
-        /*int cardinalidad_alfabeto, numero_estados_afn;
-        int i, j, r;
-        char[] arreglo_alfabeto;
-        ConjuntoIJ Ij, Ik;
-        boolean existe;
-        
-        HashSet<Estado> conjunto_auxiliar = new HashSet<Estado>();
-        HashSet<ConjuntoIJ> estados_afd = new HashSet<ConjuntoIJ>();
-        Queue<ConjuntoIJ> estados_sin_analizar = new LinkedList<ConjuntoIJ>();
-        
-        estados_afd.clear();
-        estados_sin_analizar.clear();
-        
-        cardinalidad_alfabeto = this.alfabeto.size();
-        arreglo_alfabeto = new char[cardinalidad_alfabeto];
-        i = 0;
-        
-        for(char simbolo: this.alfabeto){
-            arreglo_alfabeto[i++] = simbolo;
-        }
-        
-        j = 0; //Contador para los estados del AFD
-        Ij = new ConjuntoIJ(cardinalidad_alfabeto);
-        
-        estados_afd.add(Ij);
-        estados_sin_analizar.add(Ij);
-        j++;
-        
-        while(estados_sin_analizar.size() != 0){ //Mientras se tengan estados Ij sin analizar
-            Ik = new ConjuntoIJ(cardinalidad_alfabeto);
-            
-            if(Ik.conjunto_ij.size() == 0) //Si el conjunto fue vacío no hubo transiciones de Ij con el simbolo
-                continue;
-            
-            //Revisemos si el conjunto de estados ya existe, en caso contrario será un nuevo conjunto
-            existe = false;
-            for(ConjuntoIJ I: estados_afd){
-                if(estados_afd.contains(I)){
-                    existe = true;
-                    
-                }
-            }
-        }
-        */
+
         return afd;
     }
     
