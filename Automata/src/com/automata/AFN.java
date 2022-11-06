@@ -7,6 +7,10 @@ import java.util.ListIterator;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.BufferedWriter;
 
 public class AFN {
     public static HashSet<AFN> conjunto_afn = new HashSet<AFN>(); //Almacena todos los AFNs creados
@@ -308,7 +312,10 @@ public class AFN {
     }
     
     
-    public AFD convertirAFNaAFD(){
+    public AFD convertirAFNaAFD()throws IOException {
+        //Variables para la escritura en archivo
+        FileWriter fw = new FileWriter("tabla.txt", true);
+        
         List<ConjuntoS> conjuntos_s = new ArrayList<ConjuntoS>();
         AFD afd = new AFD();
         ConjuntoS s0 = new ConjuntoS();
@@ -319,33 +326,45 @@ public class AFN {
         afd.conjunto_inicial = s0;
         conjuntos_por_analizar.add(s0);
         
+        boolean existe = false;
         //Paso 2. Analizar el conjunto estados de Sj, debemos analizar Sj, con cada letra del alfabeto
-        ConjuntoS conjunto = new ConjuntoS();
+        ConjuntoS conjuntoS = new ConjuntoS();
         while(!conjuntos_por_analizar.isEmpty()){
-            conjunto = conjuntos_por_analizar.poll();
-            
+            conjuntoS = conjuntos_por_analizar.poll();
             for(char simbolo: this.alfabeto){
-                System.out.println("Nuevo conjunto");
                 ConjuntoS nuevo_conjunto = new ConjuntoS();
-                nuevo_conjunto.estados = ir_a(conjunto.estados, simbolo);
+                nuevo_conjunto.estados = ir_a(conjuntoS.estados, simbolo);
                 
                 if(nuevo_conjunto.estados.isEmpty()){
                     System.out.println("Se contró un conjunto vacío, por lo que no se agrega");
+                    ConjuntoS.contador_conjuntos_s--;
                     continue;
                 }
                 
                 if(conjuntos_s.contains(nuevo_conjunto)){
                     System.out.println("El conjunto S ya ha sido analizado previamente");
+                    ConjuntoS.contador_conjuntos_s--;
                     continue; //Si el conjunto ya ha sido analizado previamente, entonces lo salta y no lo agrega
                 }
                 
                 System.out.println("Se agrega nuevo conjunto S");
                 conjuntos_por_analizar.offer(nuevo_conjunto);
-                System.out.println("El conjunto S" + conjunto.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
+                System.out.println("El conjunto S" + conjuntoS.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
+                conjuntoS.transiciones[(int)simbolo] = nuevo_conjunto.id;
             }
             
-            conjuntos_s.add(conjunto);
+            conjuntos_s.add(conjuntoS);
+            }
+        
+            for(ConjuntoS conjunto: conjuntos_s){
+                for(int id: conjunto.transiciones)
+                    fw.write(id + ",");
+                
+            fw.write("\n");
+            fw.flush();
         }
+            
+        fw.close();
         
         //Paso 3. Construir el AFD
         HashSet<ConjuntoS> conjuntos_afd = new HashSet<ConjuntoS>(conjuntos_s);
