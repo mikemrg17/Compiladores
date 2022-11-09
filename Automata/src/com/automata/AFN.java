@@ -316,14 +316,20 @@ public class AFN {
         //Variables para la escritura en archivo
         FileWriter fw = new FileWriter("tabla.txt", true);
         
-        List<ConjuntoS> conjuntos_s = new ArrayList<ConjuntoS>();
-        AFD afd = new AFD();
-        ConjuntoS s0 = new ConjuntoS();
-        Queue<ConjuntoS> conjuntos_por_analizar = new LinkedList<ConjuntoS>(); //LinkedList es una subinterface de Queue
+        List<ConjuntoS> conjuntos_s = new ArrayList<ConjuntoS>(); //Conjunto de estados del AFD
+        AFD afd = new AFD(); //Se crea un nuevo AFD vacío
+        ConjuntoS s0 = new ConjuntoS(); //Conjunto inicial S0
+        Queue<ConjuntoS> conjuntos_por_analizar = new LinkedList<ConjuntoS>(); //LinkedList es una subinterface de Queue, para poder analizar cada conjunto que se vaya generado
         
         //Paso 1. Calcular la cerradura epsilon del estado inicial
         s0.estados = cerraduraEpsilon(this.estado_inicial);
-        afd.conjunto_inicial = s0;
+        
+        for(Estado estado: s0.estados){
+            System.out.println("Estado: " + estado.id);
+        }
+        
+        
+        /*afd.conjunto_inicial = s0;
         conjuntos_por_analizar.add(s0);
         
         boolean existe = false;
@@ -381,8 +387,8 @@ public class AFN {
         }
         
         //Paso 5. Obtener alfabeto
-        afd.alfabeto.addAll(this.alfabeto); //El alfabeto del AFD es igual al del AFN
-        imprimirAFD(afd);
+        afd.alfabeto.addAll(this.alfabeto); //El alfabeto del AFD es igual al del AFN*/
+        //imprimirAFD(afd);
 
         return afd;
     }
