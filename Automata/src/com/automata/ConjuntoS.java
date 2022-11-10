@@ -1,7 +1,11 @@
 package com.automata;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 
 //Equivalente a clase ConjIJ
 public class ConjuntoS { //Esta clase sirve para poder guardar los estados del AFD
@@ -35,6 +39,22 @@ public class ConjuntoS { //Esta clase sirve para poder guardar los estados del A
     
     public void setToken(int token){
         transiciones[255] = token;
+    }
+    
+    public void ordenarEstados() { //Vamos a usar la clase Comparator para poder ordenar los estados
+        List<Estado> estados_a_ordenar = new ArrayList<Estado>(this.estados);
+        estados_a_ordenar.sort(new OrdenarEstados());
+        HashSet<Estado> estados_ordenados = new HashSet<Estado>(estados_a_ordenar);
+        this.estados = estados_ordenados;
+    }
+    
+    public static void eliminarConjunto(ConjuntoS conjunto_a_eliminar) {
+        if(conjuntos_s.remove(conjunto_a_eliminar))
+            System.out.println("Conjunto eliminado");
+    }
+    
+    public HashSet<Estado> getEstados() {
+        return this.estados;
     }
     
 }
