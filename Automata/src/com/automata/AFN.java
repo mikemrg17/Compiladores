@@ -8,10 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.BufferedWriter;
-import java.util.Arrays;
 
 public class AFN {
     public static HashSet<AFN> conjunto_afn = new HashSet<AFN>(); //Almacena todos los AFNs creados
