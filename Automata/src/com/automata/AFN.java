@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.BufferedWriter;
+import java.util.Arrays;
 
 public class AFN {
     public static HashSet<AFN> conjunto_afn = new HashSet<AFN>(); //Almacena todos los AFNs creados
@@ -21,6 +22,7 @@ public class AFN {
     boolean afn_agregado; //Bandera para saber si el AFN ha sido agregado
     public int id; //Id de cada AFN
     public char epsilon = '\u0000'; //Caracter que representa a epsilon
+    public static ConjuntoS conjunto_analizado;
     
     //CONSTRUCTORES
     public AFN(){ //Crea un AFN vacío
@@ -256,11 +258,11 @@ public class AFN {
         while(!estados_por_analizar.isEmpty()){
             Estado estado_a_analizar = estados_por_analizar.pop();
             
-            if(estados_alcanzables.contains(estado))
+            if(estados_alcanzables.contains(estado_a_analizar))
                 continue;
             
-            estados_alcanzables.add(estado);
-            for(Transicion transicion: estado.transiciones){
+            estados_alcanzables.add(estado_a_analizar);
+            for(Transicion transicion: estado_a_analizar.transiciones){
                 if(transicion.simbolo_inferior == epsilon)
                     estados_por_analizar.push(transicion.estado_destino);
             }
@@ -316,49 +318,61 @@ public class AFN {
         //Variables para la escritura en archivo
         FileWriter fw = new FileWriter("tabla.txt", true);
         
-        List<ConjuntoS> conjuntos_s = new ArrayList<ConjuntoS>();
-        AFD afd = new AFD();
-        ConjuntoS s0 = new ConjuntoS();
-        Queue<ConjuntoS> conjuntos_por_analizar = new LinkedList<ConjuntoS>(); //LinkedList es una subinterface de Queue
+        List<ConjuntoS> conjuntos_s = new ArrayList<ConjuntoS>(); //Conjunto de estados del AFD
+        //Este conjunto de estados será el que se asignará a AFD.estados cuando se terminen de analizar todos los Sj
+        
+        AFD afd = new AFD(); //Se crea un nuevo AFD vacío
+        ConjuntoS s0 = new ConjuntoS(); //Conjunto inicial S0
+        Queue<ConjuntoS> conjuntos_por_analizar = new LinkedList<ConjuntoS>(); //Cola que guarda conjuntos por analizar
         
         //Paso 1. Calcular la cerradura epsilon del estado inicial
         s0.estados = cerraduraEpsilon(this.estado_inicial);
+        
+        //Vamos a ordenar los estados del conjunto S0 para realizar más fácil el saber si ya existe dentro de los conjuntos del AFD
+        s0.ordenarEstados();
+        
+        
         afd.conjunto_inicial = s0;
         conjuntos_por_analizar.add(s0);
         
-        boolean existe = false;
         //Paso 2. Analizar el conjunto estados de Sj, debemos analizar Sj, con cada letra del alfabeto
-        ConjuntoS conjuntoS = new ConjuntoS();
+        ConjuntoS conjunto_a_analizar = new ConjuntoS(); //Creamos una nueva instancia de ConjuntoS para guardar cada conjunto que vayamos analizando
         while(!conjuntos_por_analizar.isEmpty()){
-            conjuntoS = conjuntos_por_analizar.poll();
+            conjunto_a_analizar = conjuntos_por_analizar.poll(); //Sacamos el elemento de la cola
+            
+            //Cálculo de las operaciones Ir_A del conjunto a analizar con cada letra del alfabeto, para encontrar nuevos conjuntos S
             for(char simbolo: this.alfabeto){
                 ConjuntoS nuevo_conjunto = new ConjuntoS();
-                nuevo_conjunto.estados = ir_a(conjuntoS.estados, simbolo);
+                nuevo_conjunto.estados = ir_a(conjunto_a_analizar.estados, simbolo);
+                nuevo_conjunto.ordenarEstados();
                 
                 if(nuevo_conjunto.estados.isEmpty()){
-                    System.out.println("Se contró un conjunto vacío, por lo que no se agrega");
                     ConjuntoS.contador_conjuntos_s--;
+                    ConjuntoS.eliminarConjunto(nuevo_conjunto);
                     continue;
                 }
                 
-                if(conjuntos_s.contains(nuevo_conjunto)){
-                    System.out.println("El conjunto S ya ha sido analizado previamente");
+                if(contieneConjunto(conjuntos_por_analizar, conjuntos_s, nuevo_conjunto)){
                     ConjuntoS.contador_conjuntos_s--;
+                    ConjuntoS.eliminarConjunto(nuevo_conjunto);
+                    nuevo_conjunto = this.conjunto_analizado;
+                    System.out.println("El conjunto S" + conjunto_a_analizar.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
+                    conjunto_a_analizar.transiciones[(int)simbolo] = nuevo_conjunto.id;
                     continue; //Si el conjunto ya ha sido analizado previamente, entonces lo salta y no lo agrega
                 }
                 
-                System.out.println("Se agrega nuevo conjunto S");
+                //El conjunto no es repetido ni vacío, por lo que vamos a agregarlo a la cola para analizarlo posteriormente
                 conjuntos_por_analizar.offer(nuevo_conjunto);
-                System.out.println("El conjunto S" + conjuntoS.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
-                conjuntoS.transiciones[(int)simbolo] = nuevo_conjunto.id;
+                System.out.println("El conjunto S" + conjunto_a_analizar.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
+                conjunto_a_analizar.transiciones[(int)simbolo] = nuevo_conjunto.id;
             }
             
-            conjuntos_s.add(conjuntoS);
-            }
+            conjuntos_s.add(conjunto_a_analizar);
+        }
         
-            for(ConjuntoS conjunto: conjuntos_s){
-                for(int id: conjunto.transiciones)
-                    fw.write(id + ",");
+        for(ConjuntoS conjunto: conjuntos_s){
+            for(int id_conjunto_destino: conjunto.transiciones)
+                fw.write(id_conjunto_destino + ",");
                 
             fw.write("\n");
             fw.flush();
@@ -385,6 +399,28 @@ public class AFN {
         imprimirAFD(afd);
 
         return afd;
+    }
+    
+    public boolean contieneConjunto(Queue<ConjuntoS> conjuntos_por_analizar, List<ConjuntoS> conjuntos_analizados, ConjuntoS conjuntoS) {
+        boolean bandera = false;
+        
+        for(ConjuntoS conjunto_analizado: conjuntos_analizados){
+            if(conjuntoS.estados.equals(conjunto_analizado.estados)){
+                this.conjunto_analizado = conjunto_analizado;
+                bandera = true;
+                break;
+            }    
+        }
+        
+        for(ConjuntoS conjunto_por_analizar: conjuntos_por_analizar){
+            if(conjuntoS.estados.equals(conjunto_por_analizar.estados)){
+                this.conjunto_analizado = conjunto_por_analizar;
+                bandera = true;
+                break;
+            }    
+        }
+        
+        return bandera;
     }
     
     public void imprimirAFN(AFN afn){
