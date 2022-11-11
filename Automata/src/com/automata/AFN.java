@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.BufferedWriter;
+import java.util.Arrays;
 
 public class AFN {
     public static HashSet<AFN> conjunto_afn = new HashSet<AFN>(); //Almacena todos los AFNs creados
@@ -21,6 +22,7 @@ public class AFN {
     boolean afn_agregado; //Bandera para saber si el AFN ha sido agregado
     public int id; //Id de cada AFN
     public char epsilon = '\u0000'; //Caracter que representa a epsilon
+    public static ConjuntoS conjunto_analizado;
     
     //CONSTRUCTORES
     public AFN(){ //Crea un AFN vacío
@@ -329,12 +331,6 @@ public class AFN {
         //Vamos a ordenar los estados del conjunto S0 para realizar más fácil el saber si ya existe dentro de los conjuntos del AFD
         s0.ordenarEstados();
         
-        System.out.println("Estados de S0: {");
-        for(Estado estado: s0.estados){
-            System.out.println("\tEstado: " + estado.id);
-        }
-        System.out.println("}");
-        
         
         afd.conjunto_inicial = s0;
         conjuntos_por_analizar.add(s0);
@@ -351,21 +347,21 @@ public class AFN {
                 nuevo_conjunto.ordenarEstados();
                 
                 if(nuevo_conjunto.estados.isEmpty()){
-                    System.out.println("Se encontró un conjunto vacío, por lo que no se agrega");
                     ConjuntoS.contador_conjuntos_s--;
                     ConjuntoS.eliminarConjunto(nuevo_conjunto);
                     continue;
                 }
                 
-                if(contieneConjunto(conjuntos_s, nuevo_conjunto.estados)){
-                    System.out.println("El conjunto S ya ha sido analizado previamente");
+                if(contieneConjunto(conjuntos_por_analizar, conjuntos_s, nuevo_conjunto)){
                     ConjuntoS.contador_conjuntos_s--;
                     ConjuntoS.eliminarConjunto(nuevo_conjunto);
+                    nuevo_conjunto = this.conjunto_analizado;
+                    System.out.println("El conjunto S" + conjunto_a_analizar.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
+                    conjunto_a_analizar.transiciones[(int)simbolo] = nuevo_conjunto.id;
                     continue; //Si el conjunto ya ha sido analizado previamente, entonces lo salta y no lo agrega
                 }
                 
                 //El conjunto no es repetido ni vacío, por lo que vamos a agregarlo a la cola para analizarlo posteriormente
-                System.out.println("Se agrega nuevo conjunto S"); 
                 conjuntos_por_analizar.offer(nuevo_conjunto);
                 System.out.println("El conjunto S" + conjunto_a_analizar.id + " con el caracter " + simbolo + " va al conjunto S" + nuevo_conjunto.id);
                 conjunto_a_analizar.transiciones[(int)simbolo] = nuevo_conjunto.id;
@@ -405,8 +401,26 @@ public class AFN {
         return afd;
     }
     
-    public boolean contieneConjunto(List<ConjuntoS> conjuntos, HashSet<Estado> estados_conjunto) {
-        return conjuntos.stream().filter(conjunto -> conjunto.estados.equals(estados_conjunto)).findFirst().isPresent();
+    public boolean contieneConjunto(Queue<ConjuntoS> conjuntos_por_analizar, List<ConjuntoS> conjuntos_analizados, ConjuntoS conjuntoS) {
+        boolean bandera = false;
+        
+        for(ConjuntoS conjunto_analizado: conjuntos_analizados){
+            if(conjuntoS.estados.equals(conjunto_analizado.estados)){
+                this.conjunto_analizado = conjunto_analizado;
+                bandera = true;
+                break;
+            }    
+        }
+        
+        for(ConjuntoS conjunto_por_analizar: conjuntos_por_analizar){
+            if(conjuntoS.estados.equals(conjunto_por_analizar.estados)){
+                this.conjunto_analizado = conjunto_por_analizar;
+                bandera = true;
+                break;
+            }    
+        }
+        
+        return bandera;
     }
     
     public void imprimirAFN(AFN afn){

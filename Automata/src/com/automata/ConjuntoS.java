@@ -49,8 +49,7 @@ public class ConjuntoS { //Esta clase sirve para poder guardar los estados del A
     }
     
     public static void eliminarConjunto(ConjuntoS conjunto_a_eliminar) {
-        if(conjuntos_s.remove(conjunto_a_eliminar))
-            System.out.println("Conjunto eliminado");
+        conjuntos_s.remove(conjunto_a_eliminar);
     }
     
     public HashSet<Estado> getEstados() {
