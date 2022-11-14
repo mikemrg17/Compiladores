@@ -8,20 +8,18 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.BufferedWriter;
-import java.util.Arrays;
 
 public class AFN {
     public static HashSet<AFN> conjunto_afn = new HashSet<AFN>(); //Almacena todos los AFNs creados
+    //public static HashSet<AFN> conjunto_afn_especial = new HashSet<AFN>(); //Almacena todos los AFNs especiales
     Estado estado_inicial; //Estado incial del AFN
     HashSet<Estado> estados = new HashSet<Estado>(); //Conjunto de estados del AFN
     HashSet<Estado> estados_aceptacion = new HashSet<Estado>(); //Conjunto de estados de aceptación del AFN
     HashSet<Character> alfabeto = new HashSet<Character>();
     boolean afn_agregado; //Bandera para saber si el AFN ha sido agregado
     public int id; //Id de cada AFN
-    public char epsilon = '\u0000'; //Caracter que representa a epsilon
+    public static char epsilon = '\u0000'; //Caracter que representa a epsilon
     public static ConjuntoS conjunto_analizado;
     
     //CONSTRUCTORES
@@ -85,6 +83,15 @@ public class AFN {
         afn_agregado = true;
         imprimirAFN(this);
         return this;
+    }
+    
+    public static void borrarAFN(AFN afn_a_eliminar){
+        conjunto_afn.remove(afn_a_eliminar);
+    }
+    
+    public static void borrarAFNs(HashSet<AFN> afns){
+        for(AFN afn: afns)
+            conjunto_afn.remove(afn);
     }
     
     public AFN unirAFN(AFN AFN2){
@@ -313,6 +320,44 @@ public class AFN {
         return cerraduraEpsilon(mover(estados, simbolo));
     }
     
+    public static AFN unionEspecial(HashSet<String> ids){
+        AFN afn_especial = new AFN();
+        afn_especial.id = conjunto_afn.size();
+        Estado estado1 = new Estado();
+        
+        HashSet<AFN> afn_seleccionados = new HashSet<AFN>();
+        
+        for(String id: ids){
+            for(AFN afn: conjunto_afn){
+                if(afn.id == Integer.parseInt(id)){
+                    afn_seleccionados.add(afn);
+                }    
+            }
+        }
+        
+        for(AFN afn_seleccionado: afn_seleccionados){
+            for(Estado estado_aceptacion: afn_seleccionado.estados_aceptacion){
+                estado_aceptacion.token = Estado.contador_tokens * 10;
+                Estado.contador_tokens++;
+                Estado.tokens.add(estado_aceptacion.token);
+            }     
+            
+            afn_especial.estados.addAll(afn_seleccionado.estados);
+            afn_especial.estados_aceptacion.addAll(afn_seleccionado.estados_aceptacion);
+            afn_especial.alfabeto.addAll(afn_seleccionado.alfabeto);
+            estado1.transiciones.add(new Transicion(epsilon, afn_seleccionado.estado_inicial));
+        }
+        
+        afn_especial.estados.add(estado1);
+        afn_especial.estado_inicial = estado1;
+        
+        conjunto_afn.add(afn_especial);
+        //conjunto_afn_especial.add(afn_especial);
+        imprimirAFNespecial(afn_especial);
+        borrarAFNs(afn_seleccionados);
+        return afn_especial;
+    }
+    
     
     public AFD convertirAFNaAFD()throws IOException {
         //Variables para la escritura en archivo
@@ -423,7 +468,7 @@ public class AFN {
         return bandera;
     }
     
-    public void imprimirAFN(AFN afn){
+    public static void imprimirAFN(AFN afn){
         System.out.println("AFN:");
         System.out.println("Id: " + afn.id);
         System.out.println("Estados:");
@@ -475,6 +520,36 @@ public class AFN {
             System.out.printf(simbolo + ",");
         }
         System.out.printf("}\n");
+    }
+    
+    public static void imprimirAFNespecial(AFN afn){
+        System.out.println("AFN especial:");
+        System.out.println("Id: " + afn.id);
+        System.out.println("Estados:");
+        for(Estado estado: afn.estados){
+            System.out.println("\tId: " + estado.id);
+            System.out.println("\tEs de aceptación?: " +estado.de_aceptacion);
+            System.out.println("\tTransiciones:");
+            for(Transicion transicion: estado.transiciones){
+                System.out.println("\t\tSímbolo inferior: " + transicion.simbolo_inferior);
+                System.out.println("\t\tSímbolo superior: " + transicion.simbolo_superior);
+                System.out.println("\t\tEstado destino");
+                System.out.println("\t\t\tId: " + transicion.estado_destino.id);
+            }
+        }
+        System.out.println("Estado inicial:");
+        System.out.println("\tId:" + afn.estado_inicial.id);
+        System.out.println("Estados de aceptación:");
+        for(Estado estado: afn.estados_aceptacion){
+            System.out.println("\tId: " + estado.id);
+            System.out.println("\t\tToken: " + estado.token);
+        }
+        System.out.printf("Alfabeto: {");
+        for(Character simbolo: afn.alfabeto){
+            System.out.printf(simbolo + ",");
+        }
+        System.out.printf("}\n");
+        System.out.println("Ya está agregado al conjunto de AFN?: " + afn.afn_agregado);
     }
     
 }

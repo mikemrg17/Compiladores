@@ -12,7 +12,7 @@ import java.util.Stack;
  * @author alan
  */
 public class AnalizadorLexico {
-    public int token, EdoActual, EdoTransicion;
+   /*ublic int token, EdoActual, EdoTransicion;
     public String CadenaSigma;
     public String Lexema;
     public boolean PasoPorEdoAcept;
@@ -133,5 +133,5 @@ public class AnalizadorLexico {
             return false;
         IndiceCaracterActual = Pila.pop(); 
         return true;
-    }
+    }*/
 }

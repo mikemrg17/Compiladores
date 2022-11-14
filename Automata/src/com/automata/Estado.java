@@ -8,6 +8,8 @@ public class Estado {
     public boolean de_aceptacion; //Bandera para saber si el estado es de aceptación
     public int token;
     public HashSet<Transicion> transiciones = new HashSet<Transicion>(); //Conjunto de transiciones del estado
+    public static HashSet<Integer> tokens = new HashSet<Integer>();
+    public static int contador_tokens = 1;
     
     //Constructor
     public Estado(){
