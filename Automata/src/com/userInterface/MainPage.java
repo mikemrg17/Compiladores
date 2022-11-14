@@ -1,18 +1,25 @@
 package com.userInterface;
 
+import com.automata.AFD;
 import java.awt.Color;
 import com.automata.AFN;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.HashSet;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -21,6 +28,7 @@ public class MainPage extends javax.swing.JFrame{
     
     public static HashSet<String> ids_afd = new HashSet<String>(); //Hashset para los ids de los automatas
     public static HashSet<String> ids_seleccionados = new HashSet<String>(); //Para la unión especial
+    public static String afd_id; //Para probar el analizador léxico
 
     public MainPage() {
         initComponents();
@@ -793,7 +801,67 @@ public class MainPage extends javax.swing.JFrame{
 
     private void testLexicalAnalyzerLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_testLexicalAnalyzerLabelMouseClicked
         JFrame frame = new JFrame();
+        JLabel label = new JLabel("AFD a utilizar: ");
+        JLabel label2 = new JLabel("Cadena a evaluar léxicamente: ");
+        JTextArea cadena = new JTextArea("");
+        JButton analizar = new JButton("Analizar");
+        
+        String[] nombre_columnas = {"Token", "Lexema"};
+        Object[][] data = {};
+        /*Object[][] data = {
+            {"Kathy", "Smith"},
+            {"John", "Doe"},
+            {"Sue", "Black"},
+            {"Jane", "White"},
+            {"Joe", "Brown"}
+        };*/
+        
+        JTable tabla = new JTable(data, nombre_columnas);
+        JScrollPane contenedor_tabla = new JScrollPane(tabla);
+        tabla.setFillsViewportHeight(true);
+
+        
+        frame.setLayout(null);
         frame.setSize(700, 700);
+        
+        label.setBounds(10, 10, 200, 20);
+        label2.setBounds(10, 40, 200, 20);
+        
+        JComboBox<String> afds_combobox = new JComboBox<String>();
+        afds_combobox.setBounds(220, 10, 80, 20);
+        for(AFD afd: AFD.conjunto_afd){
+            afds_combobox.addItem(Integer.toString(afd.id));
+        }
+        afds_combobox.addItemListener(new ItemListener(){
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getSource()== afds_combobox) {
+                    String seleccionado=(String)afds_combobox.getSelectedItem();
+                    System.out.println("AFD SELECCIONADO: " + seleccionado);
+                    afd_id = seleccionado;
+                }
+            }
+        });
+        
+        cadena.setBounds(220, 40, 200, 100);
+        
+        analizar.setBounds(220, 150, 100, 50);
+        
+        contenedor_tabla.setBounds(220, 220, 200, 100);
+        
+        analizar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+                System.out.println("AFD: SELECCIONADO: " + afd_id);
+                System.out.println("CADENA: " + cadena.getText());
+            }
+        });
+        
+        frame.add(label);
+        frame.add(label2);
+        frame.add(afds_combobox);
+        frame.add(cadena);
+        frame.add(analizar);
+        frame.add(contenedor_tabla);
         frame.setVisible(true);
     }//GEN-LAST:event_testLexicalAnalyzerLabelMouseClicked
     
