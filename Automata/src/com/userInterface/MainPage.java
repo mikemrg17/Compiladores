@@ -2,15 +2,25 @@ package com.userInterface;
 
 import java.awt.Color;
 import com.automata.AFN;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.HashSet;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-public class MainPage extends javax.swing.JFrame {
+public class MainPage extends javax.swing.JFrame{
     
-    public HashSet<String> idSet = new HashSet<String>();
-    public HashSet<String> ids_afd = new HashSet<String>();
+    public static HashSet<String> ids_afd = new HashSet<String>(); //Hashset para los ids de los automatas
+    public static HashSet<String> ids_seleccionados = new HashSet<String>(); //Para la unión especial
 
     public MainPage() {
         initComponents();
@@ -576,7 +586,6 @@ public class MainPage extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "AFN Básico creado con símbolos: " + symbol + "\n"
                     + "Con id: " + nfa.id 
             );
-            idSet.add(Integer.toString(nfa.id));
             updateData();
         }else{
             String input = JOptionPane.showInputDialog("Inserta el símbolo inferior del AFN básico");
@@ -587,15 +596,14 @@ public class MainPage extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "AFN Básico creado con símbolos: [" + lowerSymbol + "," + upperSymbol + "]" + "\n"
                     + "Con id: " + nfa.id 
             );
-            idSet.add(Integer.toString(nfa.id));
             updateData();
         }
         
     }//GEN-LAST:event_basicLabelMouseClicked
 
     private void mergeLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mergeLabelMouseClicked
-        String idArray[] = new String[idSet.size()];
-        idSet.toArray(idArray);
+        String idArray[] = new String[ids_afd.size()];
+        ids_afd.toArray(idArray);
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Id seleccionado: " + selectedId);
@@ -606,18 +614,23 @@ public class MainPage extends javax.swing.JFrame {
         for(AFN nfa: globalNFA.conjunto_afn ){
             if(nfa.id == Integer.parseInt(mergingId))
                 nfaToMerge = nfa;
-                    
+          
         }
         
         for(AFN baseNFA: globalNFA.conjunto_afn ){
-            if(baseNFA.id == Integer.parseInt(selectedId))
+            if(baseNFA.id == Integer.parseInt(selectedId)){
                 baseNFA = baseNFA.unirAFN(nfaToMerge);
+                AFN.borrarAFN(nfaToMerge);
+                break;
+            }
         }
+        
+        updateData();
     }//GEN-LAST:event_mergeLabelMouseClicked
 
     private void concatenateLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_concatenateLabelMouseClicked
-        String idArray[] = new String[idSet.size()];
-        idSet.toArray(idArray);
+        String idArray[] = new String[ids_afd.size()];
+        ids_afd.toArray(idArray);
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Id seleccionado: " + selectedId);
@@ -633,14 +646,19 @@ public class MainPage extends javax.swing.JFrame {
         }
         
         for(AFN baseNFA: globalNFA.conjunto_afn ){
-            if(baseNFA.id == Integer.parseInt(selectedId))
+            if(baseNFA.id == Integer.parseInt(selectedId)){
                 baseNFA = baseNFA.concatenarAFN(nfaToConcatenate);
+                AFN.borrarAFN(nfaToConcatenate);
+                break;
+            }
         }
+        
+        updateData();
     }//GEN-LAST:event_concatenateLabelMouseClicked
 
     private void kleenClosureLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_kleenClosureLabelMouseClicked
-        String idArray[] = new String[idSet.size()];
-        idSet.toArray(idArray);
+        String idArray[] = new String[ids_afd.size()];
+        ids_afd.toArray(idArray);
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Selected ID: " + selectedId);
@@ -652,8 +670,8 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_kleenClosureLabelMouseClicked
 
     private void transitiveClosureLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_transitiveClosureLabelMouseClicked
-        String idArray[] = new String[idSet.size()];
-        idSet.toArray(idArray);
+        String idArray[] = new String[ids_afd.size()];
+        ids_afd.toArray(idArray);
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Selected ID: " + selectedId);
@@ -665,8 +683,8 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_transitiveClosureLabelMouseClicked
 
     private void optionalLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_optionalLabelMouseClicked
-        String idArray[] = new String[idSet.size()];
-        idSet.toArray(idArray);
+        String idArray[] = new String[ids_afd.size()];
+        ids_afd.toArray(idArray);
         String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                 null, idArray, idArray[0]);
         System.out.println("Selected ID: " + selectedId);
@@ -683,13 +701,77 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_rAFNLabelMouseClicked
 
     private void lexicalAnalyzerLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lexicalAnalyzerLabelMouseClicked
-        JOptionPane.showMessageDialog(this, "Unir para analizador léxico");
+        JFrame frame = new JFrame();
+        JLabel label = new JLabel("Selecciona los automatas:");
+        JButton acceptButton = new JButton("Aceptar");
+        JButton cancelButton = new JButton("Cancelar");
+        JLabel automatas = new JLabel("Automatas:");
+        
+        frame.setSize(500, 500);
+        
+        label.setBounds(10, 10, 500, 20);
+        label.setFont(new Font(null, Font.PLAIN, 12));
+        
+        automatas.setBounds(10, 400, 100, 20);
+        
+        acceptButton.setBounds(400, 400, 100, 50);
+        acceptButton.setVisible(true);
+        
+        cancelButton.setBounds(300, 400, 100, 50);
+        cancelButton.setVisible(true);
+        
+        
+        String[] ids = new String[ids_afd.size()];
+        ids_afd.toArray(ids);
+        
+        JList ListaIds = new JList(ids);
+        ListaIds.setBounds(50, 100, 400, 200);
+        ListaIds.setVisibleRowCount(8);
+        
+        JScrollPane jcp = new JScrollPane(ListaIds);
+        
+        ListaIds.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        ListaIds.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e){
+                String idSeleccionado = ListaIds.getSelectedValue().toString();
+                automatas.setText(idSeleccionado);
+                ids_seleccionados.add(idSeleccionado);
+            }
+        });
+        
+        acceptButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+               AFN.unionEspecial(ids_seleccionados);
+               updateData();
+               frame.dispose();
+            }
+        });
+        
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+                ids_seleccionados.clear();
+               frame.dispose();
+            }
+        });
+        
+        frame.add(label);
+        frame.add(automatas);
+        frame.add(acceptButton);
+        frame.add(cancelButton);
+        frame.add(ListaIds);
+        frame.add(jcp);
+        
+        frame.setLayout(null);
+        frame.setVisible(true);
     }//GEN-LAST:event_lexicalAnalyzerLabelMouseClicked
-
+    
     private void converterLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_converterLabelMouseClicked
         try {
-            String idArray[] = new String[idSet.size()];
-            idSet.toArray(idArray);
+            String idArray[] = new String[ids_afd.size()];
+            ids_afd.toArray(idArray);
             String selectedId = (String) JOptionPane.showInputDialog(null, "Seleccione un AFN", "Opciones", JOptionPane.DEFAULT_OPTION,
                     null, idArray, idArray[0]);
             System.out.println("Selected ID: " + selectedId);
@@ -714,9 +796,15 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_testLexicalAnalyzerLabelMouseClicked
     
     public void updateData(){
-        String idArray[] = new String[idSet.size()];
-        idSet.toArray(idArray);
-        afnList.setListData(idArray);
+        afnList.setVisible(false);
+        ids_afd.clear();
+        for(AFN afn: AFN.conjunto_afn) {
+            ids_afd.add(Integer.toString(afn.id));
+        }
+        
+        String[] ids_arreglo = new String[ids_afd.size()];
+        ids_afd.toArray(ids_arreglo);
+        afnList.setListData(ids_arreglo);
         afnList.setVisible(true);
     }
     
@@ -784,4 +872,12 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JLabel transitiveClosureLabel;
     private javax.swing.JPanel transitiveClosurePanel;
     // End of variables declaration//GEN-END:variables
+
+    public void actionPerformed(ActionEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public void valueChanged(ListSelectionEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

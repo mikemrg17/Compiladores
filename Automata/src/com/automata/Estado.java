@@ -9,6 +9,7 @@ public class Estado {
     public int token;
     public HashSet<Transicion> transiciones = new HashSet<Transicion>(); //Conjunto de transiciones del estado
     public static HashSet<Integer> tokens = new HashSet<Integer>();
+    public static int contador_tokens = 1;
     
     //Constructor
     public Estado(){
