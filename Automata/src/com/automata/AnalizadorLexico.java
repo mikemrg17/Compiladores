@@ -4,7 +4,7 @@ import static java.lang.Integer.parseInt;
 import java.util.Stack;
 
 public class AnalizadorLexico {
-    /*public int token, EdoActual, EdoTransicion;
+    public int token, EdoActual, EdoTransicion;
     public String CadenaSigma;
     public String Lexema;
     public boolean PasoPorEdoAcept;
@@ -24,7 +24,7 @@ public class AnalizadorLexico {
         AutomataFD = null;
     }
                                               //archivo AFD
-        public AnalizadorLexico(String sigma, String[][] AFD) {
+        public AnalizadorLexico(String sigma, String[][] AFDimportado) {
         AutomataFD = new AFD();
         CadenaSigma = sigma;
         PasoPorEdoAcept = false;
@@ -33,7 +33,7 @@ public class AnalizadorLexico {
         IndiceCaracterActual = 0;
         token = -1;
         Pila.clear();
-        AFD = AFD;
+        AFD = AFDimportado;
         
     }
     
@@ -90,11 +90,11 @@ public class AnalizadorLexico {
             token = -1;
             while(IndiceCaracterActual < CadenaSigma.length()){
                 CaracterActual = CadenaSigma.charAt(IndiceCaracterActual);
-                EdoTransicion = parseInt(AFD[EdoActual][CaracterActual]);
+                EdoTransicion = parseInt(AFD[EdoActual][(int)CaracterActual]);
                 if (EdoTransicion != -1){
-                    if (parseInt(AFD[EdoActual][256]) != -1){
+                    if (parseInt(AFD[EdoActual][255]) != -1){
                         PasoPorEdoAcept = true;
-                        token = parseInt(AFD[EdoActual][256]);
+                        token = parseInt(AFD[EdoActual][255]);
                         FinLexema = IndiceCaracterActual;
                     }
                     IndiceCaracterActual++;
@@ -120,10 +120,14 @@ public class AnalizadorLexico {
     }
     
     public boolean undoToken(){
-        //En la pila irá guardando la posición donde se inicia el análsisi de un nuevo lexema.
+        //En la pila irá guardando la posición donde se inicia el análsis de un nuevo lexema.
         if (Pila.size() == 0)
             return false;
         IndiceCaracterActual = Pila.pop(); 
         return true;
-    }*/
+    }
+
+    public String getLexema() {
+        return Lexema;
+    }
 }

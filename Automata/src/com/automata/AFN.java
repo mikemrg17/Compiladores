@@ -22,6 +22,7 @@ public class AFN {
     public int id; //Id de cada AFN
     public static char epsilon = '\u0000'; //Caracter que representa a epsilon
     public static ConjuntoS conjunto_analizado;
+    public static String[][] mTrans;
     
     //CONSTRUCTORES
     public AFN(){ //Crea un AFN vacío
@@ -451,6 +452,7 @@ public class AFN {
         }
             
         fw.close();
+        mTrans = matriz_transiciones;
         
         //Paso 5. Obtener alfabeto
         afd.alfabeto.addAll(this.alfabeto); //El alfabeto del AFD es igual al del AFN

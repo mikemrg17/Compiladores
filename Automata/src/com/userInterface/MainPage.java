@@ -3,6 +3,7 @@ package com.userInterface;
 import com.automata.AFD;
 import java.awt.Color;
 import com.automata.AFN;
+import com.automata.AnalizadorLexico;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +11,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -28,7 +31,8 @@ public class MainPage extends javax.swing.JFrame{
     
     public static HashSet<String> ids_afd = new HashSet<String>(); //Hashset para los ids de los automatas
     public static HashSet<String> ids_seleccionados = new HashSet<String>(); //Para la unión especial
-    public static String afd_id; //Para probar el analizador léxico
+    public static String afd_id = ""; //Para probar el analizador léxico
+    static Object[][] data = {};
 
     public MainPage() {
         initComponents();
@@ -807,7 +811,6 @@ public class MainPage extends javax.swing.JFrame{
         JButton analizar = new JButton("Analizar");
         
         String[] nombre_columnas = {"Token", "Lexema"};
-        Object[][] data = {};
         /*Object[][] data = {
             {"Kathy", "Smith"},
             {"John", "Doe"},
@@ -851,8 +854,29 @@ public class MainPage extends javax.swing.JFrame{
         analizar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e)
             {
-                System.out.println("AFD: SELECCIONADO: " + afd_id);
+                Queue<String> q1 = new LinkedList<String>();
+                Queue<String> q2 = new LinkedList<String>();
+                
+                System.out.println("AFD SELECCIONADO: " + afd_id);
                 System.out.println("CADENA: " + cadena.getText());
+                
+                AnalizadorLexico al = new AnalizadorLexico(cadena.getText(), AFN.mTrans);
+                int token;
+                
+                System.out.println("Lexema\t\tToken");
+                
+                while((token = al.yylex())!= 0){
+                    q1.add(al.getLexema()); q2.add(Integer.toString(token));
+                    System.out.println(al.getLexema() + "\t\t" + token);
+                }
+                
+                data = new Object[q1.size()][2];
+                
+                for(int i = 0; i < q1.size(); i++){
+                    data[i][0] = q2.poll();
+                    data[i][1] = q1.poll();
+                }
+                
             }
         });
         
