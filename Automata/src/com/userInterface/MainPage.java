@@ -792,7 +792,9 @@ public class MainPage extends javax.swing.JFrame{
     }//GEN-LAST:event_stringAnalyzerLabelMouseClicked
 
     private void testLexicalAnalyzerLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_testLexicalAnalyzerLabelMouseClicked
-        JOptionPane.showMessageDialog(this, "Probar el analizador léxico");
+        JFrame frame = new JFrame();
+        frame.setSize(700, 700);
+        frame.setVisible(true);
     }//GEN-LAST:event_testLexicalAnalyzerLabelMouseClicked
     
     public void updateData(){

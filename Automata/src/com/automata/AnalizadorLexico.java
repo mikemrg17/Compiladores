@@ -3,10 +3,6 @@ package com.automata;
 import static java.lang.Integer.parseInt;
 import java.util.Stack;
 
-/**
- *
- * @author alan
- */
 public class AnalizadorLexico {
     /*public int token, EdoActual, EdoTransicion;
     public String CadenaSigma;

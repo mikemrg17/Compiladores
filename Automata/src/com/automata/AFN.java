@@ -435,10 +435,17 @@ public class AFN {
             }
         }
         
+        String[][] matriz_transiciones = new String[afd.estados.size()][256];
+        int i = 0;
+        int j = 0;
         for(ConjuntoS conjunto: conjuntos_s){
-            for(int id_conjunto_destino: conjunto.transiciones)
-                fw.write(id_conjunto_destino + ",");
-                
+            for(int id_conjunto_destino: conjunto.transiciones){
+                fw.write(id_conjunto_destino + ","); //Para el archivo
+                matriz_transiciones[i][j] = Integer.toString(id_conjunto_destino);
+                j++;
+            }
+            i++;
+            j = 0;
             fw.write("\n");
             fw.flush();
         }
@@ -448,7 +455,15 @@ public class AFN {
         //Paso 5. Obtener alfabeto
         afd.alfabeto.addAll(this.alfabeto); //El alfabeto del AFD es igual al del AFN
         imprimirAFD(afd);
-
+        
+        //Imprimir matriz
+        for(int f = 0; f < afd.estados.size(); f++){
+            for(int c = 0; c < 256; c++){
+                System.out.printf("[ " + matriz_transiciones[f][c] + " ] ");
+            }
+            System.out.println("\n");
+        }
+        
         return afd;
     }
     
