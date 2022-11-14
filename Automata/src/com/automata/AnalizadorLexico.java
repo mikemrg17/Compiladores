@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.automata;
 
 import static java.lang.Integer.parseInt;
@@ -12,7 +8,7 @@ import java.util.Stack;
  * @author alan
  */
 public class AnalizadorLexico {
-   /*ublic int token, EdoActual, EdoTransicion;
+    /*public int token, EdoActual, EdoTransicion;
     public String CadenaSigma;
     public String Lexema;
     public boolean PasoPorEdoAcept;

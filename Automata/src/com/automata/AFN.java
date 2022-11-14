@@ -1,5 +1,6 @@
 package com.automata;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
@@ -360,6 +361,10 @@ public class AFN {
     
     
     public AFD convertirAFNaAFD()throws IOException {
+        File archivo = new File("tabla.txt");
+        if(archivo.delete())
+            System.out.println("Archivo borrado");
+        
         //Variables para la escritura en archivo
         FileWriter fw = new FileWriter("tabla.txt", true);
         
@@ -415,16 +420,6 @@ public class AFN {
             conjuntos_s.add(conjunto_a_analizar);
         }
         
-        for(ConjuntoS conjunto: conjuntos_s){
-            for(int id_conjunto_destino: conjunto.transiciones)
-                fw.write(id_conjunto_destino + ",");
-                
-            fw.write("\n");
-            fw.flush();
-        }
-            
-        fw.close();
-        
         //Paso 3. Construir el AFD
         HashSet<ConjuntoS> conjuntos_afd = new HashSet<ConjuntoS>(conjuntos_s);
         afd.estados.addAll(conjuntos_afd);
@@ -434,10 +429,21 @@ public class AFN {
             for(Estado estado: conjunto_s.estados){
                 if(estado.de_aceptacion == true){
                     conjunto_s.es_de_aceptacion = true;
+                    conjunto_s.transiciones[255] = estado.token;
                     afd.conjuntos_aceptacion.add(conjunto_s);
                 }   
             }
         }
+        
+        for(ConjuntoS conjunto: conjuntos_s){
+            for(int id_conjunto_destino: conjunto.transiciones)
+                fw.write(id_conjunto_destino + ",");
+                
+            fw.write("\n");
+            fw.flush();
+        }
+            
+        fw.close();
         
         //Paso 5. Obtener alfabeto
         afd.alfabeto.addAll(this.alfabeto); //El alfabeto del AFD es igual al del AFN
@@ -514,6 +520,7 @@ public class AFN {
         System.out.println("Conjuntos de aceptación:");
         for(ConjuntoS conjunto: afd.conjuntos_aceptacion){
             System.out.println("\tId: " + conjunto.id);
+            System.out.println("\t\tToken: " + conjunto.transiciones[255]);
         }
         System.out.printf("Alfabeto: {");
         for(Character simbolo: afd.alfabeto){
